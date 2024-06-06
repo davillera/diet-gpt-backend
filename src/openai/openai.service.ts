@@ -24,10 +24,17 @@ export class OpenaiService {
         model: 'gpt-3.5-turbo',
         messages: [
           {
+            role: 'system',
+            content:
+              'Eres un nutricionista y Entrenador personal con 10 años de experiencia, y te piden que hagas planes' +
+              ' nutricionales y de ejercicios, siempre debes responder en formato JSON',
+          },
+          {
             role: 'user',
             content: inputText,
           },
         ],
+        response_format: { type: 'json_object' },
         temperature: 1,
         max_tokens: 256,
         top_p: 1,
