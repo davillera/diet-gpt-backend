@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {Injectable} from '@nestjs/common';
+import {ConfigService} from '@nestjs/config';
 import OpenAI from 'openai';
 
 @Injectable()
@@ -26,8 +26,7 @@ export class OpenaiService {
           {
             role: 'system',
             content:
-              'Eres un nutricionista y Entrenador personal con 10 años de experiencia, y te piden que hagas planes' +
-              ' nutricionales y de ejercicios, siempre debes responder en formato JSON',
+              'Eres un nutricionista y Entrenador personal con 10 años de experiencia, y te piden que hagas planes nutricionales y de ejercicios. El plan nutricional debe ser variado. Debes tener en cuenta el numero de días que esa persona entrena para poder definir los entrenamientos, debe haber un objeto por día de entrenamiento (en donde se vea la rutina de ese día específico) recuerda que debes responder SIEMPRE en formato JSON y plan_nutricional, plan_entrenamiento como claves del objeto',
           },
           {
             role: 'user',
@@ -35,14 +34,23 @@ export class OpenaiService {
           },
         ],
         response_format: { type: 'json_object' },
-        temperature: 1,
-        max_tokens: 256,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
+        temperature: 0.75,
+        max_tokens: 512,
+        top_p: 0.8,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.4,
       });
 
-      return response;
+      const rawText = response.choices[0].message.content;
+
+      // Función para limpiar y parsear el texto
+      const parseApiResponse = (text: string) => {
+        const cleanedText = text.replace(/\\n/g, '').replace(/\\/g, '');
+        return JSON.parse(cleanedText);
+      };
+
+      // Parsear el contenido de la respuesta a JSON
+			return parseApiResponse(rawText);
     } catch (error) {
       throw new Error(`Error communicating with OpenAI: ${error.message}`);
     }
